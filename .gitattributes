@@ -1,0 +1,8 @@
+* text=auto
+
+# Windows line endings
+*.csproj text eol=crlf
+*.sln text eol=crlf
+
+# Unix line endings
+*.sh text eol=lf

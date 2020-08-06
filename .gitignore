@@ -3,3 +3,4 @@ PlannerExAndImport.bat
 setupEnv.bat
 bin/**
 obj/**
+my.env
