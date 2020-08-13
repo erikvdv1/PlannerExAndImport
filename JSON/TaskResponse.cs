@@ -49,6 +49,11 @@ namespace PlannerExAndImport.JSON
         [JsonProperty("percentComplete")]
         public long PercentComplete { get; set; }
 
+#if MS_GRAPH_BETA
+        [JsonProperty("priority")]
+        public long Priority { get; set; }
+#endif
+
         [JsonProperty("startDateTime")]
         public object StartDateTime { get; set; }
 

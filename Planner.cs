@@ -19,9 +19,14 @@ namespace PlannerExAndImport
     {
         // URLs and settings for the Graph connection
         private const string GRAPH_ENDPOINT = "https://graph.microsoft.com";
-        private const string PLANNER_SUB = "/v1.0/planner/";
-        private const string GROUPS_SUB = "/v1.0/groups/";
-        private const string USERS_SUB = "/v1.0/users/";
+#if MS_GRAPH_BETA
+        private const string GRAPH_VERSION = "beta";
+#else
+        private const string GRAPH_VERSION = "v1.0";
+#endif
+        private const string PLANNER_SUB = "/" + GRAPH_VERSION + "/planner/";
+        private const string GROUPS_SUB = "/" + GRAPH_VERSION + "/groups/";
+        private const string USERS_SUB = "/" + GRAPH_VERSION + "/users/";
         private const string RESOURCE_ID = GRAPH_ENDPOINT;
         public static string CLIENT_ID = "";
         public static string TENANT = "";
