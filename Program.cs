@@ -31,7 +31,6 @@ namespace PlannerExAndImport
                 else
                 {
                     Help();
-                    Console.ReadLine();
                     Environment.Exit(1);
                 }
             }
