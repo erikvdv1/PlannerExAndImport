@@ -15,7 +15,7 @@ using PlannerExAndImport.JSON;
 namespace PlannerExAndImport
 {
     // connects to the MS Graph API (https://graph.microsoft.com) and ex- and imports groups, plans, tasks, details etc.
-    public class Planner
+    public partial class Planner
     {
         // URLs and settings for the Graph connection
         private const string GRAPH_ENDPOINT = "https://graph.microsoft.com";
@@ -126,11 +126,16 @@ namespace PlannerExAndImport
             Thread.Sleep(5 * 1000);
             var verifyNewBucket = GraphResponse<Bucket>.Get("buckets/" + newBucket.Id, httpClient).Result;
 
-            bucket.Tasks = bucket.Tasks.Reverse().ToArray();
-            foreach (PlannerTask task in bucket.Tasks)
+            SaveTasks(targetPlanId, newBucket.Id, addAssignments, bucket.Tasks, httpClient);
+        }
+
+        private static void SaveTasks(string targetPlanId, string bucketId, bool addAssignments, IEnumerable<PlannerTask> tasks, HttpClient httpClient)
+        {
+            var taskList = tasks.Reverse().ToList();
+            foreach (PlannerTask task in taskList)
             {
                 task.PlanId = targetPlanId;
-                task.BucketId = newBucket.Id;
+                task.BucketId = bucketId;
                 task.OrderHint = " !";
 
                 // assignments contain the users assigned to a task
@@ -148,12 +153,13 @@ namespace PlannerExAndImport
                 var newTask = GraphResponse<PlannerTask>.Post("tasks", httpClient, task).Result;
                 // remember new task id for next loop
                 task.Id = newTask.Id;
+                task.OrderHint = newTask.OrderHint;
             }
 
             // if we are too quick the created tasks are not available yet
             Thread.Sleep(5 * 1000);
 
-            foreach (PlannerTask task in bucket.Tasks)
+            foreach (PlannerTask task in taskList)
             {
                 var newTaskDetailsResponse = GraphResponse<TaskDetailResponse>.Get("tasks/" + task.Id + "/details", httpClient).Result;
                 foreach (var checklist in task.TaskDetail.Checklist.Values)
@@ -222,15 +228,28 @@ namespace PlannerExAndImport
         private static Bucket SelectBucket()
         {
             Plan exportedPlan = Export(false).FirstOrDefault();
-            for (int i = 0; i < exportedPlan.Buckets.Length; i++)
-                Console.WriteLine("(" + i + ") " + exportedPlan.Buckets[i].Name);
+            return SelectBucket(exportedPlan);
+        }
+
+        private static Bucket SelectBucket(Plan plan)
+        {
+            if (plan.Buckets == null)
+            {
+                using (var httpClient = PreparePlannerClient())
+                {
+                    plan.Buckets = GraphResponse<BucketResponse>.Get("plans/" + plan.Id + "/buckets", httpClient).Result.Buckets;
+                }
+            }
+
+            for (int i = 0; i < plan.Buckets.Length; i++)
+                Console.WriteLine("(" + i + ") " + plan.Buckets[i].Name);
 
             string selectedBucketS = Program.GetInput("Which bucket do you want to use: ");
 
             int selectedBucket = -1;
             if (int.TryParse(selectedBucketS, out selectedBucket))
             {
-                return exportedPlan.Buckets[selectedBucket];
+                return plan.Buckets[selectedBucket];
             }
             throw new Exception("Please select a bucket");
         }
