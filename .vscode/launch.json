@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.1/PlannerExAndImport.dll",
+            "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/PlannerExAndImport.dll",
             "args": [],
             "envFile": "${workspaceFolder}/.vscode/my.env",
             "cwd": "${workspaceFolder}",
